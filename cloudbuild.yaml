@@ -43,7 +43,7 @@ steps:
         echo "$$_CHANGED_FILES"
         echo "─────────────────────────────────────────"
 
-        _UPDATED_SERVICES=$(echo $$_CHANGED_FILES | awk -F'/' '{print $3}' | sort -u)
+        _UPDATED_SERVICES=$(echo "$$_CHANGED_FILES" | awk -F'/' '{print $3}' | sed '/^$/d' | sort -u)
 
         echo "─── Updated services ───────────────────────"
         echo "$$_UPDATED_SERVICES"
