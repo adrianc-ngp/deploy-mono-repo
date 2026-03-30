@@ -37,8 +37,7 @@ steps:
         echo "Previous SHA: $$_PREVIOUS_SHA"
 
         # Diff between the two commits
-        _CHANGED_FILES=$(git diff --name-only \
-          "$${_PREVIOUS_SHA}".."$${_CURRENT_SHA}" -- "api/" | awk -F'/' '{print $3}' | sort -u )
+        _CHANGED_FILES=$(git diff --name-only "$${_PREVIOUS_SHA}".."$${_CURRENT_SHA}" -- "api/")
 
         echo "─── Changed files ───────────────────────"
         echo "$$_CHANGED_FILES"
