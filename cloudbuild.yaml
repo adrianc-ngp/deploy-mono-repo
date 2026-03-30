@@ -29,7 +29,7 @@ steps:
         if [ -z "$$_PREVIOUS_TAG" ]; then
           echo "No previous prod tag — first release, building all services"
           echo "ALL" > /workspace/changed_services.txt
-          echo "$CURRENT_SHA" > /workspace/current_sha.txt
+          echo "$$_CURRENT_SHA" > /workspace/current_sha.txt
           exit 0
         fi
 
