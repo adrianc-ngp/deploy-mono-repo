@@ -66,8 +66,8 @@ steps:
         _CURRENT_SHA=$(cat /workspace/current_sha.txt)
 
         _PROD_TAG="${TAG_NAME}"
-        PROJECT_ID="${_PROJECT_ID}"
-        REGION="europe-west2"
+        _PROJECT_ID="${_PROJECT_ID}"
+        _REGION="europe-west2"
         _ENV="stage"
 
         trigger_service_deploy() {
@@ -77,14 +77,14 @@ steps:
           _TRIGGER_ID=$(gcloud builds triggers list \
           --filter="name=$${_ENV}-acp-$${_SERVICE_NAME}" \
           --format="value(id)" \
-          --region="$REGION" \
-          --project="$PROJECT_ID")
+          --region="$${_REGION}" \
+          --project="$${_PROJECT_ID}")
 
           if [ -n "$$_TRIGGER_ID" ]; then
              echo "Found trigger ID: $$_TRIGGER_ID. Running build..."
             #  gcloud builds triggers run "$$_TRIGGER_ID" \
-            #                           --project="$PROJECT_ID" \
-            #                           --region="$REGION"
+            #                           --project="$${_PROJECT_ID}" \
+            #                           --region="$${_REGION}"
          else
              echo "No trigger found for name $${_ENV}-acp-$${_SERVICE_NAME}. Skipping build run."
          fi
