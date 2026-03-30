@@ -18,13 +18,13 @@ steps:
         _CURRENT_SHA=$(echo "$_CURRENT_TAG" | sed 's/^prod_//')
         echo "Current SHA: $_CURRENT_SHA"
 
-        # # Find the previous prod tag (exclude current)
-        # _PREVIOUS_TAG=$(git tag --sort=-version:refname \
-        #   | grep "^prod_" \
-        #   | grep -v "^${_CURRENT_TAG}$" \
-        #   | head -1)
+        # Find the previous prod tag (exclude current)
+        _PREVIOUS_TAG=$(git tag --sort=-version:refname \
+          | grep "^prod_" \
+          | grep -v "^${_CURRENT_TAG}$" \
+          | head -1)
 
-        # echo "Previous prod tag: $_PREVIOUS_TAG"
+        echo "Previous prod tag: $_PREVIOUS_TAG"
 
 options:
   logging: CLOUD_LOGGING_ONLY
