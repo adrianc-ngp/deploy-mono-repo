@@ -1,12 +1,12 @@
 steps:
-- name: 'gcr.io/cloud-builders/git'
-  entrypoint: 'bash'
-  args:
-  - '-c'
-  - |
-    set -e
-    git fetch --tags --unshallow || git fetch --tags
-    echo "Tag Received: ${TAG_NAME}"
+  - name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      set -e
+      git fetch --tags --unshallow || git fetch --tags
+      echo "Tag Received: ${TAG_NAME}"
     
   - name: 'gcr.io/cloud-builders/git'
     id: detect-changes
@@ -16,15 +16,15 @@ steps:
       - |
         CURRENT_TAG="${TAG_NAME}"
         CURRENT_SHA=$(echo "$CURRENT_TAG" | sed 's/^prod_//')
-        echo "Current SHA: $CURRENT_SHA"
+        # echo "Current SHA: $CURRENT_SHA"
 
-        # Find the previous prod tag (exclude current)
-        PREVIOUS_TAG=$(git tag --sort=-version:refname \
-          | grep "^prod_" \
-          | grep -v "^${CURRENT_TAG}$" \
-          | head -1)
+        # # Find the previous prod tag (exclude current)
+        # PREVIOUS_TAG=$(git tag --sort=-version:refname \
+        #   | grep "^prod_" \
+        #   | grep -v "^${CURRENT_TAG}$" \
+        #   | head -1)
 
-        echo "Previous prod tag: $PREVIOUS_TAG"
+        # echo "Previous prod tag: $PREVIOUS_TAG"
 
 options:
   logging: CLOUD_LOGGING_ONLY
