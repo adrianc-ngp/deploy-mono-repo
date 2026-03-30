@@ -22,7 +22,7 @@ steps:
         _PREVIOUS_TAG=$$(git tag --sort=committerdate \
           | grep "^prod_" \
           | grep -v "^$${_CURRENT_TAG}$$" \
-          | head -1)
+          | tail -n1)
 
         echo "Previous prod tag: $$_PREVIOUS_TAG"
 
@@ -38,13 +38,71 @@ steps:
 
         # Diff between the two commits
         _CHANGED_FILES=$(git diff --name-only \
-          "$${_PREVIOUS_SHA}".."$${_CURRENT_SHA}")
+          "$${_PREVIOUS_SHA}".."$${_CURRENT_SHA}" -- "api/" | awk -F'/' '{print $3}' | sort -u )
 
         echo "─── Changed files ───────────────────────"
         echo "$$_CHANGED_FILES"
         echo "─────────────────────────────────────────"
 
-        SERVICES=""
+        _UPDATED_SERVICES=$(echo $$_CHANGED_FILES | awk -F'/' '{print $3}' | sort -u)
+
+        echo "─── Updated services ───────────────────────"
+        echo "$$_UPDATED_SERVICES"
+        echo "─────────────────────────────────────────"
+
+        echo "$$_CHANGED_FILES" > /workspace/changed_files.txt
+        echo "$$_UPDATED_SERVICES" > /workspace/updated_services.txt
+        echo "$$_CURRENT_SHA" > /workspace/current_sha.txt
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: trigger-builds
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Read from workspace files written by previous step
+        FILE_CHANGES=$(cat /workspace/changed_files.txt)
+        SERVICES=$(cat /workspace/updated_services.txt)
+        CURRENT_SHA=$(cat /workspace/current_sha.txt)
+
+        PROD_TAG="${TAG_NAME}"
+        PROJECT_ID="${_PROJECT_ID}"
+        REGION="europe-west2"
+        ENV="stage"
+
+        trigger_service_deploy() {
+          SERVICE_NAME="$1"
+          echo "Triggering build for $SERVICE_NAME with tag $PROD_TAG and SHA $CURRENT_SHA"
+
+          TRIGGER_ID=$(gcloud builds triggers list \
+          --filter="name=${ENV}-acp-${service_name}" \
+          --format="value(id)" \
+          --region="$REGION" \
+          --project="$PROJECT_ID")
+
+          if [ -n "$TRIGGER_ID" ]; then
+             echo "Found trigger ID: $TRIGGER_ID. Running build..."
+            #  gcloud builds triggers run "$TRIGGER_ID" \
+            #                           --project="$PROJECT_ID" \
+            #                           --region="$REGION"
+         else
+             echo "No trigger found for name ${ENV}-acp-${service_name}. Skipping build run."
+         fi
+
+        }
+
+        if [ -z "$SERVICES" ]; then
+          echo "No services changed — nothing to deploy"
+        else
+          for SERVICE in $SERVICES; do
+            trigger_service_deploy "$SERVICE"
+          done
+        fi
+
+
+
+substitutions:
+  _PROJECT_ID: 'dubai-stage-475011'
 
 options:
   logging: CLOUD_LOGGING_ONLY
