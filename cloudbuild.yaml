@@ -14,9 +14,9 @@ steps:
     args:
       - '-c'
       - |
-        CURRENT_TAG="${TAG_NAME}"
-        CURRENT_SHA=$(echo "$CURRENT_TAG" | sed 's/^prod_//')
-        # echo "Current SHA: $CURRENT_SHA"
+        CURRENT_TAG="$${TAG_NAME}"
+        CURRENT_SHA=$$(echo "$$CURRENT_TAG" | sed 's/^prod_//')
+        echo "Current SHA: $$CURRENT_SHA"
 
         # # Find the previous prod tag (exclude current)
         # PREVIOUS_TAG=$(git tag --sort=-version:refname \
