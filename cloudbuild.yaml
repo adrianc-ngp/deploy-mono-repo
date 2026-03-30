@@ -19,12 +19,32 @@ steps:
         echo "Current SHA: $$_CURRENT_SHA"
 
         # Find the previous prod tag (exclude current)
-        _PREVIOUS_TAG=$$(git tag --sort=-version:refname \
+        _PREVIOUS_TAG=$$(git tag --sort=committerdate \
           | grep "^prod_" \
           | grep -v "^$${_CURRENT_TAG}$$" \
           | head -1)
 
         echo "Previous prod tag: $$_PREVIOUS_TAG"
+
+        if [ -z "$$_PREVIOUS_TAG" ]; then
+          echo "No previous prod tag — first release, building all services"
+          echo "ALL" > /workspace/changed_services.txt
+          echo "$CURRENT_SHA" > /workspace/current_sha.txt
+          exit 0
+        fi
+
+        _PREVIOUS_SHA=$(echo "$$_PREVIOUS_TAG" | sed 's/^prod_//')
+        echo "Previous SHA: $$_PREVIOUS_SHA"
+
+        # Diff between the two commits
+        _CHANGED_FILES=$(git diff --name-only \
+          "$${_PREVIOUS_SHA}".."$${_CURRENT_SHA}")
+
+        echo "─── Changed files ───────────────────────"
+        echo "$$_CHANGED_FILES"
+        echo "─────────────────────────────────────────"
+
+        SERVICES=""
 
 options:
   logging: CLOUD_LOGGING_ONLY
