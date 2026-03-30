@@ -61,28 +61,28 @@ steps:
       - '-c'
       - |
         # Read from workspace files written by previous step
-        FILE_CHANGES=$(cat /workspace/changed_files.txt)
-        SERVICES=$(cat /workspace/updated_services.txt)
-        CURRENT_SHA=$(cat /workspace/current_sha.txt)
+        _FILE_CHANGES=$(cat /workspace/changed_files.txt)
+        _SERVICES=$(cat /workspace/updated_services.txt)
+        _CURRENT_SHA=$(cat /workspace/current_sha.txt)
 
-        PROD_TAG="${TAG_NAME}"
+        _PROD_TAG="${TAG_NAME}"
         PROJECT_ID="${_PROJECT_ID}"
         REGION="europe-west2"
         ENV="stage"
 
         trigger_service_deploy() {
           _SERVICE_NAME="$1"
-          echo "Triggering build for $$_SERVICE_NAME with tag $PROD_TAG and SHA $CURRENT_SHA"
+          echo "Triggering build for $$_SERVICE_NAME with tag $$_PROD_TAG and SHA $$_CURRENT_SHA"
 
-          TRIGGER_ID=$(gcloud builds triggers list \
+          _TRIGGER_ID=$(gcloud builds triggers list \
           --filter="name=${ENV}-acp-$${_SERVICE_NAME}" \
           --format="value(id)" \
           --region="$REGION" \
           --project="$PROJECT_ID")
 
-          if [ -n "$TRIGGER_ID" ]; then
-             echo "Found trigger ID: $TRIGGER_ID. Running build..."
-            #  gcloud builds triggers run "$TRIGGER_ID" \
+          if [ -n "$$_TRIGGER_ID" ]; then
+             echo "Found trigger ID: $$_TRIGGER_ID. Running build..."
+            #  gcloud builds triggers run "$$_TRIGGER_ID" \
             #                           --project="$PROJECT_ID" \
             #                           --region="$REGION"
          else
@@ -91,11 +91,11 @@ steps:
 
         }
 
-        if [ -z "$SERVICES" ]; then
+        if [ -z "$$_SERVICES" ]; then
           echo "No services changed — nothing to deploy"
         else
-          for SERVICE in $SERVICES; do
-            trigger_service_deploy "$SERVICE"
+          for _SERVICE in $$_SERVICES; do
+            trigger_service_deploy "$$_SERVICE"
           done
         fi
 
