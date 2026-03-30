@@ -1,0 +1,11 @@
+steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    echo "${TAG_NAME}"
+    echo "Starting build run in mono-repo-test/pro/service1..."
+
+options:
+  logging: CLOUD_LOGGING_ONLY
